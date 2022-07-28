@@ -1,0 +1,104 @@
+
+<!-- merged into 18945, if there's an issue pls email miki-->
+
+<PlusConfiguration version="2.4">
+  <DataCollection StartupDelaySec="1.0" >
+    <DeviceSet
+      Name="PlusServer: Optical marker tracker merged"
+      Description="Tracking of printed ArUco markers using a simple camera. Marker positions and image data are broadcasted through OpenIGTLink (on port 18945). To use a different camera, change CaptureDeviceId attribute (to 0, 1, 2, ...)." />
+    
+    <Device
+      Id="VideoDevice"
+      Type="MmfVideo"
+      FrameSize="640 480"
+      VideoFormat="YUY2"
+      CaptureDeviceId="0" >
+      <DataSources>
+        <DataSource Type="Video" Id="Video" PortUsImageOrientation="UN" ImageType="RGB_COLOR" />
+      </DataSources>
+      <OutputChannels>
+        <OutputChannel Id="VideoStream" VideoDataSourceId="Video" />
+      </OutputChannels>
+    </Device>
+
+    <Device
+      Id="TrackerDevice"
+      Type="OpticalMarkerTracker"
+      CameraCalibrationFile="OpticalMarkerTracker/realsense_gen2_calibration.yml"
+      ToolReferenceFrame="Tracker"
+      TrackingMethod="OPTICAL"
+      MarkerDictionary="ARUCO_MIP_36h12">
+      <DataSources>
+		<!-- <DataSource Type="Tool" Id="Marker0" MarkerId="0" MarkerSizeMm="80" />
+		<DataSource Type="Tool" Id="Marker1" MarkerId="1" MarkerSizeMm="80" /> -->
+		<DataSource Type="Tool" Id="Marker5" MarkerId="5" MarkerSizeMm="30" />
+		<DataSource Type="Tool" Id="Marker6" MarkerId="6" MarkerSizeMm="30" />
+		<DataSource Type="Tool" Id="Marker7" MarkerId="7" MarkerSizeMm="30" />
+		<DataSource Type="Tool" Id="Marker8" MarkerId="8" MarkerSizeMm="30" />
+      </DataSources>
+      <InputChannels>
+        <InputChannel Id="VideoStream" />
+      </InputChannels>
+      <OutputChannels>
+        <OutputChannel Id="TrackerStream" >
+          <DataSource Id="Marker5"/>
+		  <DataSource Id="Marker6"/>
+          <DataSource Id="Marker7"/>
+          <DataSource Id="Marker8"/>
+        </OutputChannel>
+      </OutputChannels>
+    </Device>
+	<!-- this is a mixer, it is combining video streaming from the webcam with the tracker transform streaming -->
+    <Device Id="TrackedDevice" Type="VirtualMixer">
+      <InputChannels>
+        <InputChannel Id="TrackerStream" /> <!-- tracking info outpu (includes probe and guider)-->
+        <InputChannel Id="VideoStream" /> <!-- image adquisition output-->
+      </InputChannels>
+      <OutputChannels>
+        <OutputChannel Id="CompleteChannel" /> <!-- output complete -->
+      </OutputChannels>
+    </Device>    
+	
+    <Device
+      Id="CaptureDevice"
+      Type="VirtualCapture"
+      BaseFilename="RecordingTest.igs.mha"
+      EnableCapturingOnStart="FALSE" >
+      <InputChannels>
+        <InputChannel Id="CompleteChannel" />
+      </InputChannels>
+    </Device>
+   </DataCollection>
+
+ <!-- Sending to 3D Slicer into 18945 -->
+  <PlusOpenIGTLinkServer 
+    MaxNumberOfIgtlMessagesToSend="1" 
+    MaxTimeSpentWithProcessingMs="50" 
+    ListeningPort="18945" 
+    SendValidTransformsOnly="true" 
+    OutputChannelId="CompleteChannel" > 
+    <DefaultClientInfo> 
+      <MessageTypes> 
+        <Message Type="IMAGE" />
+        <Message Type="TRANSFORM" />
+      </MessageTypes>
+      <ImageNames>
+        <Image Name="Image" EmbeddedTransformToFrame="Image" />
+      </ImageNames>
+      <TransformNames>
+	<!-- these transforms below are used to track the distance between each marker and the camera -->
+        <Transform Name="Marker5ToTracker" /> <!-- probe -->
+        <Transform Name="Marker6ToTracker" />
+		
+        <Transform Name="Marker7ToTracker" />  <!-- rigid rig -->
+        <Transform Name="Marker8ToTracker" />	  
+	  
+	 <!-- these transforms are for the distance/relationship between the two trackers -->
+	    <Transform Name="Marker5ToMarker7" />
+		<Transform Name="Marker6ToMarker8" />
+		
+      </TransformNames>
+    </DefaultClientInfo>
+  </PlusOpenIGTLinkServer>
+
+</PlusConfiguration>
