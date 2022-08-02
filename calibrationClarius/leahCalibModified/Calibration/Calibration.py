@@ -44,7 +44,7 @@ class CalibrationWidget(ScriptedLoadableModuleWidget):
 
     # Models
     # Clarius Probe
-    self.probeModel = slicer.util.loadModel('C:/calibrationClarius/Current_Models/c7hd3.stl')
+    self.probeModel = slicer.util.loadModel('C:/ClariusTracker/calibrationClarius/Current_Models/c7hd3.stl')
     self.probeModelDisplayNode = self.probeModel.GetDisplayNode()
     self.probeModelDisplayNode.SetColor(0, 0.5, 0.1)
 
@@ -64,7 +64,7 @@ class CalibrationWidget(ScriptedLoadableModuleWidget):
     self.clipboard = np.matrix('0,0,0,0;0,0,0,0;0,0,0,0;0,0,0,0', dtype = np.float64)
     self.numFid = 0
     self.sequenceLogic = slicer.modules.sequences.logic()
-    self.counter = 0 
+    self.counter = 0
     self.centroid = [0,0,0]
     self.isVisualizing = False
     self.currentMatrix = np.matrix('1,0,0,0;0,1,0,0;0,0,1,0;0,0,0,1', dtype = np.float64)
@@ -91,27 +91,28 @@ class CalibrationWidget(ScriptedLoadableModuleWidget):
     ScriptedLoadableModuleWidget.setup(self)
     # This sets the view being used to the red view only 
     slicer.app.layoutManager().setLayout(slicer.vtkMRMLLayoutNode.SlicerLayoutOneUpRedSliceView)
-    #This code block creates a collapsible button 
-    #This defines which type of button you are using 
+
+    #This code block creates a collapsible button
+    #This defines which type of button you are using
     self.usContainer = ctk.ctkCollapsibleButton()
-    #This is what the button will say 
+    #This is what the button will say
     self.usContainer.text = "Ultrasound Information"
     #Thiss actually creates that button
     self.layout.addWidget(self.usContainer)
-    #This creates a variable that describes layout within this collapsible button 
+    #This creates a variable that describes layout within this collapsible button
     self.usLayout = qt.QFormLayout(self.usContainer)
 
-    #This descirbes the type of widget 
+    #This describes the type of widget
     self.inputIPLineEdit = qt.QLineEdit()
-    #This sets a placehoder example of what should be inputted to the line edit 
-    self.inputIPLineEdit.setPlaceholderText("127.0.0.1")
-    #This is the help tooltip 
+    #This sets a placehoder example of what should be inputted to the line edit
+    self.inputIPLineEdit.setPlaceholderText("192.168.1.1")
+    #This is the help tooltip
     self.inputIPLineEdit.toolTip = "Put the IP address of your ultrasound device here"
-    #This is the text that is input inot the line 
+    #This is the text that is input inot the line
     self.IPLabel = qt.QLabel("Server IP:")
     if slicer.mrmlScene.GetNodesByClass("vtkMRMLSequenceNode").GetNumberOfItems() == 0:
       self.usLayout.addRow(self.IPLabel, self.inputIPLineEdit)
-    #This code block is the exact same as the one above only it asks for the server port 
+    #This code block is the exact same as the one above only it asks for the server port
     self.layout.addWidget(self.usContainer)
     self.inputPortLineEdit = qt.QLineEdit()
     self.inputPortLineEdit.setPlaceholderText("18944")
@@ -120,16 +121,18 @@ class CalibrationWidget(ScriptedLoadableModuleWidget):
     self.portLabel = qt.QLabel("Server Port:")
     if slicer.mrmlScene.GetNodesByClass("vtkMRMLSequenceNode").GetNumberOfItems() == 0:
       self.usLayout.addRow(self.portLabel, self.inputPortLineEdit)
-    #This is a push button 
+    #This is a push button
     self.connectButton = qt.QPushButton()
     self.connectButton.setDefault(False)
-    #This button says connect 
+    #This button says connect
     self.connectButton.text = "Connect"
-    #help tooltip that explains the funciton 
+    #help tooltip that explains the function
     self.connectButton.toolTip = "Connects to Ultrasound"
-    #adds the widget to the layout 
+
+    #adds the widget to the layout
     if slicer.mrmlScene.GetNodesByClass("vtkMRMLSequenceNode").GetNumberOfItems() == 0:
       self.usLayout.addWidget(self.connectButton)
+
     # Combobox for image selection
     self.imageSelector = slicer.qMRMLNodeComboBox()
     self.imageSelector.nodeTypes = ["vtkMRMLScalarVolumeNode"]
@@ -142,8 +145,8 @@ class CalibrationWidget(ScriptedLoadableModuleWidget):
     self.imageSelector.setMRMLScene( slicer.mrmlScene )
     self.imageSelector.setToolTip( "Pick the image to be used." )
     self.usLayout.addRow("US Volume: ", self.imageSelector)
-    
-    #add combo box for linear transform node 
+
+    #add combo box for linear transform node
     self.TransformSelector = slicer.qMRMLNodeComboBox()
     self.TransformSelector.nodeTypes = ["vtkMRMLLinearTransformNode"]
     self.TransformSelector.selectNodeUponCreation = True
@@ -155,7 +158,76 @@ class CalibrationWidget(ScriptedLoadableModuleWidget):
     self.TransformSelector.setMRMLScene( slicer.mrmlScene )
     self.TransformSelector.setToolTip( "Pick the transform representing the straw line." )
     self.usLayout.addRow("Tip to Probe: ", self.TransformSelector)
-    
+
+    #######################
+    # This code block creates a collapsible button
+    # This defines which type of button you are using
+    self.arucoContainer = ctk.ctkCollapsibleButton()
+    # This is what the button will say
+    self.arucoContainer.text = "Aruco Information"
+    # Thiss actually creates that button
+    self.layout.addWidget(self.arucoContainer)
+    # This creates a variable that describes layout within this collapsible button
+    self.arucoLayout = qt.QFormLayout(self.arucoContainer)
+
+    # This describes the type of widget
+    self.arucoInputIPLineEdit = qt.QLineEdit()
+    # This sets a placehoder example of what should be inputted to the line edit
+    self.arucoInputIPLineEdit.setPlaceholderText("127.0.0.1")
+    # This is the help tooltip
+    self.arucoInputIPLineEdit.toolTip = "Put the IP address of your ultrasound device here"
+    # This is the text that is input inot the line
+    self.arucoIPLabel = qt.QLabel("Server IP:")
+    if slicer.mrmlScene.GetNodesByClass("vtkMRMLSequenceNode").GetNumberOfItems() == 0:
+      self.arucoLayout.addRow(self.arucoIPLabel, self.arucoInputIPLineEdit)
+    # This code block is the exact same as the one above only it asks for the server port
+    self.layout.addWidget(self.arucoContainer)
+    self.arucoInputPortLineEdit = qt.QLineEdit()
+    self.arucoInputPortLineEdit.setPlaceholderText("18945")
+    self.arucoInputPortLineEdit.setValidator(qt.QIntValidator())
+    self.arucoInputPortLineEdit.toolTip = "Put the Port of your ultrasound device here"
+    self.arucoPortLabel = qt.QLabel("Server Port:")
+    if slicer.mrmlScene.GetNodesByClass("vtkMRMLSequenceNode").GetNumberOfItems() == 0:
+      self.arucoLayout.addRow(self.arucoPortLabel, self.arucoInputPortLineEdit)
+    # This is a push button
+    self.arucoConnectButton = qt.QPushButton()
+    self.arucoConnectButton.setDefault(False)
+    # This button says connect
+    self.arucoConnectButton.text = "Connect"
+    # help tooltip that explains the function
+    self.arucoConnectButton.toolTip = "Connects to Ultrasound"
+
+    # adds the widget to the layout
+    if slicer.mrmlScene.GetNodesByClass("vtkMRMLSequenceNode").GetNumberOfItems() == 0:
+      self.arucoLayout.addWidget(self.arucoConnectButton)
+
+    # Combobox for image selection
+    self.arucoImageSelector = slicer.qMRMLNodeComboBox()
+    self.arucoImageSelector.nodeTypes = ["vtkMRMLScalarVolumeNode"]
+    self.arucoImageSelector.selectNodeUponCreation = True
+    self.arucoImageSelector.addEnabled = False
+    self.arucoImageSelector.removeEnabled = False
+    self.arucoImageSelector.noneEnabled = True
+    self.arucoImageSelector.showHidden = False
+    self.arucoImageSelector.showChildNodeTypes = False
+    self.arucoImageSelector.setMRMLScene(slicer.mrmlScene)
+    self.arucoImageSelector.setToolTip("Pick the image to be used.")
+    self.arucoLayout.addRow("US Volume: ", self.arucoImageSelector)
+
+    # add combo box for linear transform node
+    self.arucoTransformSelector = slicer.qMRMLNodeComboBox()
+    self.arucoTransformSelector.nodeTypes = ["vtkMRMLLinearTransformNode"]
+    self.arucoTransformSelector.selectNodeUponCreation = True
+    self.arucoTransformSelector.addEnabled = False
+    self.arucoTransformSelector.removeEnabled = False
+    self.arucoTransformSelector.noneEnabled = True
+    self.arucoTransformSelector.showHidden = False
+    self.arucoTransformSelector.showChildNodeTypes = False
+    self.arucoTransformSelector.setMRMLScene(slicer.mrmlScene)
+    self.arucoTransformSelector.setToolTip("Pick the transform representing the straw line.")
+    self.arucoLayout.addRow("Tip to Probe: ", self.arucoTransformSelector)
+    #######################
+
     self.calibrationContainer = ctk.ctkCollapsibleButton()
     #This is what the button will say 
     self.calibrationContainer.text = "Calibration Parameters"
@@ -451,7 +523,7 @@ class CalibrationWidget(ScriptedLoadableModuleWidget):
   def onRecordButtonClicked(self):
     if self.connectCheck == 0:
       if self.sequenceBrowserNode is None:
-        if self.imageNode is None: 
+        if self.imageNode is None:
           print('Please select an US volume')
         else:
           slicer.modules.sequencebrowser.setToolBarVisible(1)
