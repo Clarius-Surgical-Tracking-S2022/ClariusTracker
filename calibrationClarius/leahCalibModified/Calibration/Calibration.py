@@ -117,7 +117,7 @@ class CalibrationWidget(ScriptedLoadableModuleWidget):
     self.inputPortLineEdit.setPlaceholderText("18944")
     self.inputPortLineEdit.setValidator(qt.QIntValidator())
     self.inputPortLineEdit.toolTip = "Put the Port of your ultrasound device here"
-    self.portLabel = qt.QLabel("Sever Port:")
+    self.portLabel = qt.QLabel("Server Port:")
     if slicer.mrmlScene.GetNodesByClass("vtkMRMLSequenceNode").GetNumberOfItems() == 0:
       self.usLayout.addRow(self.portLabel, self.inputPortLineEdit)
     #This is a push button 
