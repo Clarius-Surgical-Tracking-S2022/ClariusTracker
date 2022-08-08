@@ -11,6 +11,7 @@ import sys
 import vtk
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtk.util import numpy_support
+from scipy import ndimage
 
 
 # custom event for handling change in freeze state
@@ -107,56 +108,6 @@ class MainWidget(QtWidgets.QMainWindow):
         conn = QtWidgets.QPushButton("Connect")
         quit = QtWidgets.QPushButton("Quit")
 
-        '''
-        # create central widget within main window
-        central = QtWidgets.QWidget()
-        self.setCentralWidget(central)
-        
-        
-        ip = QtWidgets.QLineEdit("192.168.1.1")
-        ip.setInputMask("000.000.000.000")
-        port = QtWidgets.QLineEdit("5828")
-        port.setInputMask("00000")
-        '''
-
-
-        """
-        # try to connect/disconnect to/from the probe
-        def tryConnect():
-            if not cast.isConnected():
-                if cast.connect(ip.text(), int(port.text())):
-                    self.statusBar().showMessage("Connected")
-                    conn.setText("Disconnect")
-                else:
-                    self.statusBar().showMessage("Failed to connect to {0}".format(ip.text()))
-            else:
-                if cast.disconnect():
-                    self.statusBar().showMessage("Disconnected")
-                    conn.setText("Connect")
-                else:
-                    self.statusBar().showMessage("Failed to disconnect")
-
-        # try to freeze/unfreeze
-        def tryFreeze():
-            if cast.isConnected():
-                cast.userFunction(1, 0)
-
-        # try depth up
-        def tryDepthUp():
-            if cast.isConnected():
-                cast.userFunction(4, 0)
-
-        # try depth down
-        def tryDepthDown():
-            if cast.isConnected():
-                cast.userFunction(5, 0)
-                
-        conn.clicked.connect(tryConnect)
-        self.run.clicked.connect(tryFreeze)
-        quit.clicked.connect(self.shutdown)
-        depthUp.clicked.connect(tryDepthUp)
-        depthDown.clicked.connect(tryDepthDown)
-        """
         # add widgets to layout
         #self.img = ImageView(cast)
         layout = QtWidgets.QVBoxLayout()
@@ -276,7 +227,7 @@ def buttonsFn(button, clicks):
 ## main function
 def main():
     window = vtk.vtkRenderWindow()
-    window.SetSize(900, 900)
+    window.SetSize(1400, 1400)
     renderer = vtk.vtkRenderer()
     actor = vtk.vtkImageActor()
 
@@ -287,7 +238,7 @@ def main():
     window.AddRenderer(renderer)
 
     client = pyigtl.OpenIGTLinkClient(host="129.100.44.175", port=18944)
-
+    # my ip address is 129.100.44.175
     timestep = 0
 
     imdata = vtk.vtkImageData()
@@ -302,10 +253,7 @@ def main():
         timestep += 1
         message = client.wait_for_message("Image_Reference", timeout=3)
 
-        matrix = np.eye(4)
-        message_transform = pyigtl.TransformMessage(matrix, device_name="Image_Reference", timestamp=message.timestamp)
-        scalars = numpy_support.numpy_to_vtk(np.flip(message_transform.image, axis=1).reshape(-1, 3), deep=True, array_type=vtk.VTK_DOUBLE)
-        #scalars = numpy_support.numpy_to_vtk(np.flip(message.image, axis=1).reshape(-1, 3), deep=True, array_type=vtk.VTK_DOUBLE)
+        scalars = numpy_support.numpy_to_vtk(np.flip(message.image, axis=1).reshape(-1, 3), deep=True, array_type=vtk.VTK_DOUBLE)
         imdata.SetDimensions(message.image.shape[2], message.image.shape[1], 1)
         imdata.GetPointData().SetScalars(scalars)
 

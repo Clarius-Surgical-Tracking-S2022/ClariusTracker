@@ -1,0 +1,123 @@
+
+<!-- merged into 18945, if there's an issue pls email miki-->
+
+<PlusConfiguration version="2.4">
+  <DataCollection StartupDelaySec="1.0" >
+    <DeviceSet
+      Name="PlusServer: Optical marker tracker merged BIG"
+      Description="Tracking of printed ArUco markers using a simple camera. Marker positions and image data are broadcasted through OpenIGTLink (on port 18945). To use a different camera, change CaptureDeviceId attribute (to 0, 1, 2, ...)." />
+    
+    <Device
+      Id="VideoDevice"
+      Type="MmfVideo"
+      FrameSize="640 480"
+      VideoFormat="YUY2"
+      CaptureDeviceId="0" >
+      <DataSources>
+        <DataSource Type="Video" Id="Video" PortUsImageOrientation="UN" ImageType="RGB_COLOR" />
+      </DataSources>
+      <OutputChannels>
+        <OutputChannel Id="VideoStream" VideoDataSourceId="Video" />
+      </OutputChannels>
+    </Device>
+
+    <Device
+      Id="TrackerDevice"
+      Type="OpticalMarkerTracker"
+      CameraCalibrationFile="OpticalMarkerTracker/new_calibration.yml"
+      ToolReferenceFrame="Tracker"
+      TrackingMethod="OPTICAL"
+      MarkerDictionary="ARUCO_MIP_36h12">
+      <DataSources>
+		<DataSource Type="Tool" Id="Marker0" MarkerId="0" MarkerSizeMm="80" />
+		<DataSource Type="Tool" Id="Marker1" MarkerId="1" MarkerSizeMm="80" />
+		<DataSource Type="Tool" Id="Marker2" MarkerId="2" MarkerSizeMm="80" />
+      </DataSources>
+      <InputChannels>
+        <InputChannel Id="VideoStream" />
+      </InputChannels>
+      <OutputChannels>
+        <OutputChannel Id="TrackerStream" >
+          <DataSource Id="Marker0"/>
+		  <DataSource Id="Marker1"/>
+		  <DataSource Id="Marker2"/>
+		  
+        </OutputChannel>
+      </OutputChannels>
+    </Device>
+	<!-- this is a mixer, it is combining video streaming from the webcam with the tracker transform streaming -->
+    <Device Id="TrackedDevice" Type="VirtualMixer">
+      <InputChannels>
+        <InputChannel Id="TrackerStream" /> <!-- tracking info output (includes probe and guider)-->
+        <InputChannel Id="VideoStream" /> <!-- image adquisition output-->
+      </InputChannels>
+      <OutputChannels>
+        <OutputChannel Id="CompleteChannel" /> <!-- output complete -->
+      </OutputChannels>
+    </Device>    
+	
+    <Device
+      Id="CaptureDevice"
+      Type="VirtualCapture"
+      BaseFilename="RecordingTest.igs.mha"
+      EnableCapturingOnStart="FALSE" >
+      <InputChannels>
+        <InputChannel Id="CompleteChannel" />
+      </InputChannels>
+    </Device>
+   </DataCollection>
+   
+   <CoordinateDefinitions>
+
+<!-- If the Calibration Matrix is known it can be applied here: -->
+
+    <Transform From="StylusTip" To="Marker0"
+      Matrix="
+        0.999944 0 -0.010541 -2.56983 
+-0.0104884 0.0997964 -0.994953 -242.563 
+0.00105196 0.995008 0.0997909 24.3284 
+0 0 0 1 "
+       Error="3.93523" Date="112317_141120" />
+	   
+	<Transform From="Platform" To="Marker1"
+      Matrix="
+        -0.996181 -0.0241396 -0.0839048 -86.4118 
+-0.0169446 0.9962 -0.0854307 41.0111 
+0.0856482 -0.0836827 -0.992805 10.9212 
+0 0 0 1 "
+       Error="1.65" Date="112317_141120" />
+   </CoordinateDefinitions>
+   
+
+ <!-- Sending to 3D Slicer into 18945 -->
+  <PlusOpenIGTLinkServer 
+    MaxNumberOfIgtlMessagesToSend="1" 
+    MaxTimeSpentWithProcessingMs="50" 
+    ListeningPort="18945" 
+    SendValidTransformsOnly="true" 
+    OutputChannelId="CompleteChannel" > 
+    <DefaultClientInfo> 
+      <MessageTypes> 
+        <Message Type="IMAGE" />
+        <Message Type="TRANSFORM" />
+      </MessageTypes>
+      <ImageNames>
+        <Image Name="Image" EmbeddedTransformToFrame="Image" />
+      </ImageNames>
+      <TransformNames>
+	<!-- These transforms are the default uncalibrated distances between the Aruco marker and camera -->
+        <Transform Name="Marker0ToTracker" /> <!-- stylus -->
+        <Transform Name="Marker1ToTracker" /> <!-- platform -->
+		<Transform Name="Marker2ToTracker" /> <!-- clarius -->
+	<!-- These transforms will be used during the calibration -->	
+		<Transform Name="StylusTipToMarker0" /> <!-- Calibrated stylus tip with respect to the marker -->
+		<Transform Name="StylusTipToTracker" /> <!-- Calibrated stylus position tracked by the camera-->
+		<Transform Name="PlatformToMarker1" /> 
+		<Transform Name="PlatformToTracker" />
+		<Transform Name="StylusTipToMarker1" />
+		
+      </TransformNames>
+    </DefaultClientInfo>
+  </PlusOpenIGTLinkServer>
+
+</PlusConfiguration>
