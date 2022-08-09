@@ -73,9 +73,9 @@
 
     <Transform From="StylusTip" To="Marker0"
       Matrix="
-        0.999944 0 -0.010541 -2.56983 
--0.0104884 0.0997964 -0.994953 -242.563 
-0.00105196 0.995008 0.0997909 24.3284 
+        0.999936 0 0.011349 2.77614 
+0.0112957 0.0967928 -0.99524 -243.45 
+-0.0010985 0.995305 0.0967866 23.6754 
 0 0 0 1 "
        Error="3.93523" Date="112317_141120" />
 	   
@@ -115,6 +115,7 @@
 		<Transform Name="PlatformToMarker1" /> 
 		<Transform Name="PlatformToTracker" />
 		<Transform Name="StylusTipToMarker1" />
+		<Transform Name="PlatformToMarker2" />
 		
       </TransformNames>
     </DefaultClientInfo>
