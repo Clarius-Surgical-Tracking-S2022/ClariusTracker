@@ -73,18 +73,18 @@
 
     <Transform From="StylusTip" To="Marker0"
       Matrix="
-        0.999936 0 0.011349 2.77614 
-0.0112957 0.0967928 -0.99524 -243.45 
--0.0010985 0.995305 0.0967866 23.6754 
+        0.999944 0 -0.010541 -2.56983 
+-0.0104884 0.0997964 -0.994953 -242.563 
+0.00105196 0.995008 0.0997909 24.3284 
 0 0 0 1 "
        Error="3.93523" Date="112317_141120" />
 	   
 	<Transform From="Platform" To="Marker1"
       Matrix="
-        -0.996181 -0.0241396 -0.0839048 -86.4118 
--0.0169446 0.9962 -0.0854307 41.0111 
-0.0856482 -0.0836827 -0.992805 10.9212 
-0 0 0 1 "
+        -0.0796121 -0.07292 0.994155 1201.53 
+-0.0841652 0.994251 0.0661871 -0.266575 
+-0.993266 -0.078404 -0.0852917 -158.032 
+0 0 0 1  "
        Error="1.65" Date="112317_141120" />
    </CoordinateDefinitions>
    
@@ -112,7 +112,8 @@
 	<!-- These transforms will be used during the calibration -->	
 		<Transform Name="StylusTipToMarker0" /> <!-- Calibrated stylus tip with respect to the marker -->
 		<Transform Name="StylusTipToTracker" /> <!-- Calibrated stylus position tracked by the camera-->
-		<Transform Name="PlatformToMarker1" /> 
+		<Transform Name="PlatformToMarker1" />
+		<Transform Name="PlatformToMarker2" />
 		<Transform Name="PlatformToTracker" />
 		<Transform Name="StylusTipToMarker1" />
 		<Transform Name="PlatformToMarker2" />

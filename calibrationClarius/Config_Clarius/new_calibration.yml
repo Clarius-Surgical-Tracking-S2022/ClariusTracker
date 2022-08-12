@@ -1,3 +1,7 @@
+% This file contains the calibration matrix for the Logitech webcam we used.
+% To find out how to calibrate your camera, look on the Plus website for Aruco calibration:
+% http://perk-software.cs.queensu.ca/plus/doc/nightly/dev/DeviceOpticalMarkerTracker.html
+
 %YAML:1.0
 ---
 image_width: 640
