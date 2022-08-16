@@ -43,10 +43,12 @@ class CalibrationWidget(ScriptedLoadableModuleWidget):
     ScriptedLoadableModuleWidget.__init__(self, parent)
 
     # Models
+    '''
     # Clarius Probe
-    self.probeModel = slicer.util.loadModel('C:/ClariusTracker/calibrationClarius/Current_Models/c7hd3.stl')
+    self.probeModel = slicer.util.loadModel('C:/d/ClariusTracker/calibrationClarius/Current_Models/c7hd3.stl')
     self.probeModelDisplayNode = self.probeModel.GetDisplayNode()
     self.probeModelDisplayNode.SetColor(0, 0.5, 0.1)
+    '''
 
     # Set member variables equal to None
     self.tempNode = None 
