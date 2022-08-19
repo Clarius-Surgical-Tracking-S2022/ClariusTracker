@@ -12,7 +12,7 @@ import math
 
 def AOPA_Major(X, Y, tol):
     """
-    Computes the Procrustean fiducial registration between X and Y with 
+    Computes the Procrustean fiducial registration between X and Y with
     anisotropic Scaling:
         
         Y = R * A * X + t

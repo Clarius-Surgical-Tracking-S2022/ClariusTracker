@@ -14,13 +14,14 @@ from AOPA_Major import AOPA_Major
 
 def p2l_s(X, Y, D, tol):
     """
-    Computes the Procrustean point-line registration between X and Y+nD with 
+    Computes the Procrustean point-line registration between X and Y+nD with
     anisotropic Scaling,
-        
+
+
     where X is a mxn matrix, m is typically 3
           Y is a mxn matrix denoting line origin, same dimension as X
           D is a mxn normalized matrix denoting line direction
-          
+
           R is a mxm rotation matrix,
           A is a mxm diagonal scaling matrix, and
           t is a mx1 translation vector
@@ -47,3 +48,5 @@ def p2l_s(X, Y, D, tol):
     E = Q - np.matmul(R, np.matmul(A,X)) - np.matmul(t,e)
     fre = np.sum(np.linalg.norm(E,ord=1,axis=0,keepdims=True))/X.shape[1]
     return[R,t,A,Q,fre]
+
+print(usPoints)
