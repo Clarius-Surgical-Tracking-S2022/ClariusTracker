@@ -6,6 +6,7 @@ import vtk
 import slicer
 from slicer.ScriptedLoadableModule import *
 from slicer.util import VTKObservationMixin
+from vtk.util import numpy_support
 import numpy as np
 import numpy.matlib
 import math
@@ -227,16 +228,45 @@ class PTL_RegistrationWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         # bigholePositions = np.zeros((wireSequenceNode.GetNumberOfDataNodes(), 3))
 
-        wireSequenceNode = slicer.util.getNode('Wirepoints')
+        wireSequenceNode = slicer.util.getNode('boxToProbe-boxToProbe-Seq')
         browserNode = slicer.modules.sequences.logic().GetFirstBrowserNodeForSequenceNode(wireSequenceNode)
+        browserNode.SetSelectedItemNumber(0)
 
-        for count in range(wireSequenceNode.GetNumberOfDataNodes()):
+        originalPoints = slicer.util.getNode('trackLine')
+        shNode = slicer.vtkMRMLSubjectHierarchyNode.GetSubjectHierarchyNode(slicer.mrmlScene)
+        originalID = shNode.GetItemByDataNode(originalPoints)
 
-            bighole = browserNode.GetProxyNode(wireSequenceNode)
-            Y = slicer.util.arrayFromMarkupsControlPoints(bighole)
-            browserNode.SetSelectedItemNumber(count)
+        print('START\n')
 
+        for count in range(wireSequenceNode.GetNumberOfDataNodes()):  # Loops 22 times
+            browserNode.SetSelectedItemNumber(count)  # Moves to next sequence
 
+            # Creates a copy of the original untransformed line points
+            clonedItemID = slicer.modules.subjecthierarchy.logic().CloneSubjectHierarchyItem(shNode, originalID)
+            clonedNode = shNode.GetItemDataNode(clonedItemID)
+
+            # Gets the current sequence's unique 'PlatformToMarker2' transform values
+            currentPTMNode = slicer.util.getNode('PlatformToMarker2')
+            currentTrackNode = slicer.util.getNode('Marker2ToTracker')
+
+            #copyArray = slicer.util.arrayFromMarkupsControlPoints(originalPoints)
+            platformVTK = currentPTMNode.GetMatrixTransformFromParent()
+            trackerVTK = currentTrackNode.GetMatrixTransformFromParent()
+
+            print("ITERATION:", count+1, "\n")
+            print("TRANSFORM PTM:", platformVTK, "\n")
+            print("TRANSFORM TRACK:", trackerVTK, "\n")
+            print("POINTS:", slicer.util.arrayFromMarkupsControlPoints(clonedNode), "\n")
+            clonedNode.ApplyTransformMatrix(platformVTK)
+            clonedNode.ApplyTransformMatrix(trackerVTK)
+
+            print("PTS TRANSFORMED:", slicer.util.arrayFromMarkupsControlPoints(clonedNode), "\n")
+            #copyPoints.SetAndObserveTransformNodeID(currentTransformNode.GetID())
+
+            #print(slicer.util.arrayFromMarkupsControlPoints(copyPoints))
+            #print(slicer.util.arrayFromTransformMatrix(currentTransformNode))
+
+        print('FINISH\n')
         ############################
 
         # Load widget from .ui file (created by Qt Designer).
