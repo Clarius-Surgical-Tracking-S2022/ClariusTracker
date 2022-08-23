@@ -213,6 +213,15 @@ class PTL_RegistrationWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self._parameterNode = None
         self._updatingGUIFromParameterNode = False
 
+    '''
+    def ApplyTransformMatrixToControlPoint(vtkMRMLMarkupsFiducialNode pointListNode, int index, vtkMatrix4x4 transformMatrix):
+        position = pointListNode.GetNthControlPointPosition(index)
+        position.append(1.0)
+        transformMatrix.MultiplyPoint(position)
+
+        return position
+    '''
+
     def setup(self):
         """
         Called when the user opens the module the first time and the widget is initialized.
@@ -232,40 +241,92 @@ class PTL_RegistrationWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         browserNode = slicer.modules.sequences.logic().GetFirstBrowserNodeForSequenceNode(wireSequenceNode)
         browserNode.SetSelectedItemNumber(0)
 
-        originalPoints = slicer.util.getNode('trackLine')
+
         shNode = slicer.vtkMRMLSubjectHierarchyNode.GetSubjectHierarchyNode(slicer.mrmlScene)
-        originalID = shNode.GetItemByDataNode(originalPoints)
+        #originalID = shNode.GetItemByDataNode(originalPoints)
+
+        #originalPoints = slicer.util.getNode('trackLine')
+        #originalArray = slicer.util.arrayFromMarkupsControlPoints(originalPoints)
+        originListNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsFiducialNode", "originList")
+        directionListNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsFiducialNode", "directionList")
 
         print('START\n')
+        #wireSequenceNode.GetNumberOfDataNodes()
+        for count in range(3):  # Loops 22 times
+            # Moves to current sequence
+            browserNode.SetSelectedItemNumber(count)
+            # Get the sequence's current transformed node
+            currentNode = slicer.util.getNode('trackLine')
+            currentPTMNode = slicer.util.getNode('PlatformToMarker2')
 
-        for count in range(wireSequenceNode.GetNumberOfDataNodes()):  # Loops 22 times
-            browserNode.SetSelectedItemNumber(count)  # Moves to next sequence
+            # Clone the sequence's current transformed node
+            #shNode = slicer.vtkMRMLSubjectHierarchyNode.GetSubjectHierarchyNode(slicer.mrmlScene)
+            #itemIDToClone = shNode.GetItemByDataNode(currentNode)
+            #clonedItemID = slicer.modules.subjecthierarchy.logic().CloneSubjectHierarchyItem(shNode, itemIDToClone)
+            #clonedNode = shNode.GetItemDataNode(clonedItemID)
 
-            # Creates a copy of the original untransformed line points
-            clonedItemID = slicer.modules.subjecthierarchy.logic().CloneSubjectHierarchyItem(shNode, originalID)
-            clonedNode = shNode.GetItemDataNode(clonedItemID)
+            # Harden the clone and copy its points onto each markup list
+            currentNode.HardenTransform()
+            print(slicer.util.arrayFromMarkupsControlPoints(currentNode))
+            currentNode.SetAndObserveTransformNodeID(currentPTMNode.GetID())
 
+
+            '''
             # Gets the current sequence's unique 'PlatformToMarker2' transform values
             currentPTMNode = slicer.util.getNode('PlatformToMarker2')
             currentTrackNode = slicer.util.getNode('Marker2ToTracker')
 
-            #copyArray = slicer.util.arrayFromMarkupsControlPoints(originalPoints)
+            # copyArray = slicer.util.arrayFromMarkupsControlPoints(originalPoints)
             platformVTK = currentPTMNode.GetMatrixTransformFromParent()
+
+            trackerVTK = currentTrackNode.GetMatrixTransformFromParent()
+
+            # The current origin point added to the list is originally just "bigHole" from the originalPoints list
+            newOriginIndex = originListNode.AddControlPoint([originalArray[0][0], originalArray[0][1], originalArray[0][2]])
+            #newOrigin = originListNode.GetNthControlPoint(newOriginIndex)
+            originListNode.SetNthControlPointLabel(newOriginIndex, "origin" + str(count))
+
+            # Applying the current transforms onto the origin
+            currentPosition = list(originListNode.GetNthControlPointPosition(0))
+            currentPosition.append(1.0)
+            platformVTK.MultiplyPoint(currentPosition)
+
+            #transformedPosition = trackerVTK.MultiplyPoint(platformVTK.MultiplyPoint(currentPosition))
+            transformedPosition = platformVTK.MultiplyPoint(currentPosition)
+
+            print(transformedPosition)
+
+            #originListNode.SetNthControlPointPosition(newOrigin, 6.0, 7.0, 8.0)
+            '''
+
+            '''
+            # This current origin point is referenced here by getting the control point at the current index [count]
+            currentOrigin = originListNode().GetControlPoints()[count]
+            
+            # Creates a copy of the original untransformed line points
+            #clonedItemID = slicer.modules.subjecthierarchy.logic().CloneSubjectHierarchyItem(shNode, originalID)
+            #clonedNode = shNode.GetItemDataNode(clonedItemID)
+
+            # Gets the current sequence's unique 'PlatformToMarker2' and 'Marker2ToTracker' transform values
+            currentPTMNode = slicer.util.getNode('PlatformToMarker2')
+            currentTrackNode = slicer.util.getNode('Marker2ToTracker')
+
+            #copyArray = slicer.util.arrayFromMarkupsControlPoints(originalPoints)
+            platformVTK = currentPTMNode.GetMatrixTransformFromParent().Invert()
             trackerVTK = currentTrackNode.GetMatrixTransformFromParent()
 
             print("ITERATION:", count+1, "\n")
             print("TRANSFORM PTM:", platformVTK, "\n")
             print("TRANSFORM TRACK:", trackerVTK, "\n")
             print("POINTS:", slicer.util.arrayFromMarkupsControlPoints(clonedNode), "\n")
-            clonedNode.ApplyTransformMatrix(platformVTK)
-            clonedNode.ApplyTransformMatrix(trackerVTK)
+
 
             print("PTS TRANSFORMED:", slicer.util.arrayFromMarkupsControlPoints(clonedNode), "\n")
             #copyPoints.SetAndObserveTransformNodeID(currentTransformNode.GetID())
 
             #print(slicer.util.arrayFromMarkupsControlPoints(copyPoints))
             #print(slicer.util.arrayFromTransformMatrix(currentTransformNode))
-
+            '''
         print('FINISH\n')
         ############################
 
