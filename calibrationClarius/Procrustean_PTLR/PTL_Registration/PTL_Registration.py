@@ -237,9 +237,6 @@ class PTL_RegistrationWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         # bigholePositions = np.zeros((wireSequenceNode.GetNumberOfDataNodes(), 3))
 
-        wireSequenceNode = slicer.util.getNode('boxToProbe-boxToProbe-Seq')
-        browserNode = slicer.modules.sequences.logic().GetFirstBrowserNodeForSequenceNode(wireSequenceNode)
-        browserNode.SetSelectedItemNumber(0)
 
 
         shNode = slicer.vtkMRMLSubjectHierarchyNode.GetSubjectHierarchyNode(slicer.mrmlScene)
@@ -250,26 +247,35 @@ class PTL_RegistrationWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         originListNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsFiducialNode", "originList")
         directionListNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsFiducialNode", "directionList")
 
+        transformSequenceNode = slicer.util.getNode("PlatformToMarker2")
+        originalListNode = slicer.util.getNode('trackLine')
+
+        wireSequenceNode = slicer.util.getNode('boxToProbe-boxToProbe-Seq')
+        browserNode = slicer.modules.sequences.logic().GetFirstBrowserNodeForSequenceNode(wireSequenceNode)
+        browserNode.SetSelectedItemNumber(0)
+
         print('START\n')
+        print("Unhardened Original Points:", slicer.util.arrayFromMarkupsControlPoints(originalListNode))
+
         #wireSequenceNode.GetNumberOfDataNodes()
-        for count in range(3):  # Loops 22 times
-            # Moves to current sequence
-            browserNode.SetSelectedItemNumber(count)
-            # Get the sequence's current transformed node
-            currentNode = slicer.util.getNode('trackLine')
-            currentPTMNode = slicer.util.getNode('PlatformToMarker2')
+        for index in range(3):
+            # Moves sequence browser to the current sequence
+            browserNode.SetSelectedItemNumber(index)
 
-            # Clone the sequence's current transformed node
-            #shNode = slicer.vtkMRMLSubjectHierarchyNode.GetSubjectHierarchyNode(slicer.mrmlScene)
-            #itemIDToClone = shNode.GetItemByDataNode(currentNode)
-            #clonedItemID = slicer.modules.subjecthierarchy.logic().CloneSubjectHierarchyItem(shNode, itemIDToClone)
-            #clonedNode = shNode.GetItemDataNode(clonedItemID)
+            # Obtain the current sequence's unique "PlatformToMarker2" transform values
+            currentTransform = wireSequenceNode.GetNthDataNode(index).GetTransformToParent()
 
-            # Harden the clone and copy its points onto each markup list
-            currentNode.HardenTransform()
-            print(slicer.util.arrayFromMarkupsControlPoints(currentNode))
-            currentNode.SetAndObserveTransformNodeID(currentPTMNode.GetID())
+            # Clone the original markup list node
+            shNode = slicer.vtkMRMLSubjectHierarchyNode.GetSubjectHierarchyNode(slicer.mrmlScene)
+            itemIDToClone = shNode.GetItemByDataNode(originalListNode)
+            clonedItemID = slicer.modules.subjecthierarchy.logic().CloneSubjectHierarchyItem(shNode, itemIDToClone)
+            clonedNode = shNode.GetItemDataNode(clonedItemID)
+            clonedNode.ApplyTransform(currentTransform)
+            clonedNode.HardenTransform()
+            print("Hardened Clone Point ", index, ":\n", slicer.util.arrayFromMarkupsControlPoints(clonedNode), "\n")
 
+            # Removing the cloned node since it is no longer needed.
+            slicer.mrmlScene.RemoveNode(clonedNode)
 
             '''
             # Gets the current sequence's unique 'PlatformToMarker2' transform values
