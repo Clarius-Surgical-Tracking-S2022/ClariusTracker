@@ -250,11 +250,11 @@ class PTL_RegistrationWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         browserNode = slicer.modules.sequences.logic().GetFirstBrowserNodeForSequenceNode(wireSequenceNode)
         browserNode.SetSelectedItemNumber(0)
 
-        originArr = np.zeros(shape=(wireSequenceNode.GetNumberOfDataNodes(), 3))
-        normDirectionArr = np.zeros(shape=(wireSequenceNode.GetNumberOfDataNodes(), 3))
+        originArr = np.zeros(shape=(3, wireSequenceNode.GetNumberOfDataNodes()))
+        normDirectionArr = np.zeros(shape=(3, wireSequenceNode.GetNumberOfDataNodes()))
 
         print('START\n')
-        print("Unhardened Original Points:", slicer.util.arrayFromMarkupsControlPoints(originalListNode))
+        #print("Unhardened Original Points:", slicer.util.arrayFromMarkupsControlPoints(originalListNode))
 
         #wireSequenceNode.GetNumberOfDataNodes()
         for index in range(wireSequenceNode.GetNumberOfDataNodes()):
@@ -282,23 +282,43 @@ class PTL_RegistrationWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             normDirection = direction/LA.norm(direction)
 
             # Assign these values to the arrays used as input for the PTL function
-            originArr[index] = bigHole
-            normDirectionArr[index] = normDirection
+            # Ensure they are inputted as 3xn rather than nx3
+            originArr[0][index] = bigHole[0]
+            originArr[1][index] = bigHole[1]
+            originArr[2][index] = bigHole[2]
 
-            #print("Hardened Clone Point ", index, ":\n", transformedNodeArr, "\n")
-            #print("Origin: ", bigHole)
-            #print("Direction: ", direction)
-            #print("Normalized Direction: ", normDirection)
+            normDirectionArr[0][index] = normDirection[0]
+            normDirectionArr[1][index] = normDirection[1]
+            normDirectionArr[2][index] = normDirection[2]
 
             # Removing the cloned node since it is no longer needed.
             slicer.mrmlScene.RemoveNode(clonedNode)
 
-        print("US Points:\n", usPoints.tolist())
-        print("Origins:\n", originArr.tolist())
-        print("Normalized Directions:\n", normDirectionArr.tolist())
+        #print("US Points:\n", usPoints.transpose().tolist())
+        #print("Origins:\n", originArr.tolist())
+        #print("Normalized Directions:\n", normDirectionArr.tolist())
 
-        #results = p2l_s(usPoints, originArr, normDirectionArr, 1e-6)
+        results = p2l_s(usPoints.transpose(), originArr, normDirectionArr, 1e-6)
         #print(results)
+
+        # Copying the results into numpy arrays
+        rotationMat = np.copy(results[0])
+        translationMat = np.copy(results[1])
+
+        # Using the copied results to create a 4x4 numpy matrix
+        calibTransformNP = np.copy(rotationMat) # 3x3
+        calibTransformNP = np.append(calibTransformNP, translationMat, axis=1) # 3x4
+        calibTransformNP = np.append(calibTransformNP, [[0, 0, 0, 1]], axis=0) # 4x4
+
+        print(calibTransformNP)
+
+        # Creating a transform node and updating it with the numpy transform values
+        calibTransform = slicer.vtkMRMLTransformNode()
+        calibTransform.SetName("CalibTransform")
+        calibTransform.SetAndObserveMatrixTransformToParent(slicer.util.vtkMatrixFromArray(calibTransformNP))
+        slicer.mrmlScene.AddNode(calibTransform)
+
+
 
         print('FINISH\n')
         ############################
