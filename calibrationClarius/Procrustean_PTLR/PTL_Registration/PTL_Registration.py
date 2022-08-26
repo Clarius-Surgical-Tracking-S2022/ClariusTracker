@@ -27,8 +27,8 @@ def AOPA_Major(X, Y, tol):
           Y is a mxn matrix, same dimension as X
 
           R is a mxm rotation matrix,
-          A is a mxm diagonal scaling matrix, and
-          t is a mx1 translation vector
+          t is a mx1 translation vector, and
+          A is a mxm diagonal scaling matrix
 
     based on the Majorization Principle
     """
@@ -91,8 +91,8 @@ def p2l_s(X, Y, D, tol):
           D is a mxn normalized matrix denoting line direction
 
           R is a mxm rotation matrix,
-          A is a mxm diagonal scaling matrix, and
           t is a mx1 translation vector
+          A is a mxm diagonal scaling matrix, and
           Q is a mxn fiducial on line that is closest to X after registration
           fre is the fiducial registration error
 
@@ -304,13 +304,16 @@ class PTL_RegistrationWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         # Copying the results into numpy arrays
         rotationMat = np.copy(results[0])
         translationMat = np.copy(results[1])
+        scalingMat = np.copy(results[2])
 
         # Using the copied results to create a 4x4 numpy matrix
         calibTransformNP = np.copy(rotationMat) # 3x3
+        calibTransformNP = np.matmul(calibTransformNP, scalingMat) # 3x3, Scaled
         calibTransformNP = np.append(calibTransformNP, translationMat, axis=1) # 3x4
-        calibTransformNP = np.append(calibTransformNP, [[0, 0, 0, 1]], axis=0) # 4x4
+        calibTransformNP = -1*np.append(calibTransformNP, [[0, 0, 0, 1]], axis=0) # 4x4
 
         print(calibTransformNP)
+        print(results[4])
 
         # Creating a transform node and updating it with the numpy transform values
         calibTransform = slicer.vtkMRMLTransformNode()

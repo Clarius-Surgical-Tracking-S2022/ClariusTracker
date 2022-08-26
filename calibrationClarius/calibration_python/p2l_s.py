@@ -48,3 +48,5 @@ def p2l_s(X, Y, D, tol):
     E = Q - np.matmul(R, np.matmul(A,X)) - np.matmul(t,e)
     fre = np.sum(np.linalg.norm(E,ord=1,axis=0,keepdims=True))/X.shape[1]
     return[R,t,A,Q,fre]
+
+

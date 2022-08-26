@@ -6,7 +6,7 @@
     <Device Id="VideoDevice"
       Type="Clarius"
       IpAddress = "192.168.1.1"
-      TcpPort = "44333"
+      TcpPort = "5828"
       FrameWidth = "640"
       FrameHeight = "480"
       ImuEnabled = "TRUE"
