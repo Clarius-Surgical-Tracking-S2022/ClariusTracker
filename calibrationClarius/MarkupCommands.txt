@@ -1,0 +1,36 @@
+To get accurate positions of each hole on the CT Slicer scene, I manually took 10 markup points at each hole in several markup lists, and then found the average/mean position of these 10 points. 
+After I got a hole's mean position, I added it to a markup list titled "final_points".
+The commands I used in the 3DSlicer Python Interactor can be found below:
+
+# GENERAL CASE
+import numpy as np
+points = getNode("markupList")
+pointsArr = slicer.util.arrayFromMarkupsControlPoints(points)
+meanAxes = np.array([np.mean(pointsArr[:,0]),np.mean(pointsArr[:,1]),np.mean(pointsArr[:,2])])
+print(meanAxes)
+
+# STRING HOLES
+# These two points represent the start and end positions of the fishwire line, which was found using the bottom holes on each "clip" glued onto the plastic box.
+
+# Small clip hole (The smaller clip with no Aruco/Optical trackers)
+import numpy as np
+smallNode = getNode("small_frameHole")
+smallArr = slicer.util.arrayFromMarkupsControlPoints(smallNode)
+smallAxes = np.array([np.mean(smallArr[:,0]),np.mean(smallArr[:,1]),np.mean(smallArr[:,2])])
+print(smallAxes)
+
+# Big clip hole (The bigger clip with Aruco/Optical trackers attached)
+bigNode = getNode("big_frameHole")
+bigArr = slicer.util.arrayFromMarkupsControlPoints(bigNode)
+bigAxes = np.array([np.mean(bigArr[:,0]),np.mean(bigArr[:,1]),np.mean(bigArr[:,2])])
+print(bigArr)
+
+# ARUCO HOLES
+# These four points represent the four holes used to calibrate the spatial position of the box using Aruco trackers.
+# I only listed one example here, but you can just repeat this exact same code for each of the 4 holes.
+
+nodeHole1 = getNode("posHole1")
+arrHole1 = slicer.util.arrayFromMarkupsControlPoints(nodeHole1)
+axesHole1 = np.array([np.mean(arrHole1[:,0]),np.mean(arrHole1[:,1]),np.mean(arrHole1[:,2])])
+print(axesHole1)
+

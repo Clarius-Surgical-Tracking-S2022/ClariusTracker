@@ -1,10 +1,9 @@
-
-<!-- merged into 18945, if there's an issue pls email miki-->
+<!-- All Aruco trackers are merged here using the port 18945. -->
 
 <PlusConfiguration version="2.4">
   <DataCollection StartupDelaySec="1.0" >
     <DeviceSet
-      Name="PlusServer: Optical marker tracker merged BIG"
+      Name="PlusServer: Aruco Optical Trackers Clarius"
       Description="Tracking of printed ArUco markers using a simple camera. Marker positions and image data are broadcasted through OpenIGTLink (on port 18945). To use a different camera, change CaptureDeviceId attribute (to 0, 1, 2, ...)." />
     
     <Device
@@ -45,11 +44,11 @@
         </OutputChannel>
       </OutputChannels>
     </Device>
-	<!-- this is a mixer, it is combining video streaming from the webcam with the tracker transform streaming -->
+	<!-- This is a mixer. It combines webcam video streaming with the tracker transform streaming -->
     <Device Id="TrackedDevice" Type="VirtualMixer">
       <InputChannels>
-        <InputChannel Id="TrackerStream" /> <!-- tracking info output (includes probe and guider)-->
-        <InputChannel Id="VideoStream" /> <!-- image adquisition output-->
+        <InputChannel Id="TrackerStream" /> <!-- tracking info output (includes probe and guider) -->
+        <InputChannel Id="VideoStream" /> <!-- image accquisition output -->
       </InputChannels>
       <OutputChannels>
         <OutputChannel Id="CompleteChannel" /> <!-- output complete -->
@@ -69,16 +68,16 @@
    
    <CoordinateDefinitions>
 
-<!-- If the Calibration Matrix is known it can be applied here: -->
-
+<!-- Paste the pivot calibration matrix here to apply it on Marker0: -->
     <Transform From="StylusTip" To="Marker0"
       Matrix="
         0.999944 0 -0.010541 -2.56983 
 -0.0104884 0.0997964 -0.994953 -242.563 
 0.00105196 0.995008 0.0997909 24.3284 
 0 0 0 1 "
-       Error="3.93523" Date="112317_141120" />
+       Error="3.93523" Date="112317_141120" />\
 	   
+<!-- Paste the platform calibration matrix here to apply it on Marker1: -->
 	<Transform From="Platform" To="Marker1"
       Matrix="
         -0.0796121 -0.07292 0.994155 1201.53 
@@ -105,7 +104,7 @@
         <Image Name="Image" EmbeddedTransformToFrame="Image" />
       </ImageNames>
       <TransformNames>
-	<!-- These transforms are the default uncalibrated distances between the Aruco marker and camera -->
+	<!-- These transforms are the default uncalibrated distances between the Aruco markers and camera -->
         <Transform Name="Marker0ToTracker" /> <!-- stylus -->
         <Transform Name="Marker1ToTracker" /> <!-- platform -->
 		<Transform Name="Marker2ToTracker" /> <!-- clarius -->
@@ -116,7 +115,6 @@
 		<Transform Name="PlatformToMarker2" />
 		<Transform Name="PlatformToTracker" />
 		<Transform Name="StylusTipToMarker1" />
-		<Transform Name="PlatformToMarker2" />
 		
       </TransformNames>
     </DefaultClientInfo>

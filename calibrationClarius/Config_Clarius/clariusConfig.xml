@@ -1,7 +1,7 @@
 <PlusConfiguration version="2.1">
   <DataCollection StartupDelaySec="1.0" >
     <DeviceSet
-      Name="PlusServer: Clarius ultrasound device"
+      Name="PlusServer: Tracked Clarius ultrasound device"
       Description="Broadcasting acquired video through OpenIGTLink"/>
     <Device Id="VideoDevice"
       Type="Clarius"
@@ -32,6 +32,7 @@
     </Device>
   </DataCollection>
   <CoordinateDefinitions>
+  <!-- Paste the point-to-line calibration matrix here to apply it on the Clarius' image stream: -->
     <Transform From="Image" To="Reference"
       Matrix="
       0.2 0.0 0.0 0.0
