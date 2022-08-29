@@ -1,6 +1,8 @@
-# ClariusTracker
+# calibrationClarius
 
-This repository contains all material used for our Clarius Carotid artery segmentation project. The purpose of each folder can be read below:
+This folder contains all materials used to calibrate the Clarius ultrasound probe for our Clarius Carotid artery segmentation project.\
+To learn how to use this calibration folder, read the tutorial below.\
+To understand the purpose of each folder, scroll to the end of this document until you reach the header "Folders"\
 
 ## Folders
 ### Aruco_PDFs
