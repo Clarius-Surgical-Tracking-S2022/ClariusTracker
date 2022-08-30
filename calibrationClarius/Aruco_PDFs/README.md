@@ -28,7 +28,15 @@ aruco_calibration_board_a4.pdf - Used to calibrate the webcam with the Plus Tool
 3. As mentioned in the Plus tutorial [^1], you need to execute the file "aruco_calibration.exe". This executable can be found in your Plus folder within the file path: (PlusApp-Version/bin/aruco_calibration.exe). To start this file, you can either double-click it or use the command prompt by changing directory to the correct file path and typing "start aruco_calibration.exe". 
 4. Redo this calibration until you get as low of an error as possible. The webcam calibration file we used for this tutorial is titled "new_calibration.yml" in the file path (ClariusTracker/calibrationClarius/Config_Clarius/new_calibration.yml). Please note that your values and error will likely vary from this, especially if you're using a different webcam.
 5. Once you've completed the webcam calibration and tried minimizing error, drag the output .yml file into the file path (PlusApp-Version/config/OpticalMarkerTracker). For future reference, this output webcam calibration .yml file will be named "webcam_calibration.yml".
-6. Cut out each of the 3 Aruco markers from your "arucoComplete.pdf" printout and set them aside.
+6. Now, open the file "arucoTracking.xml" in the file path (calibrationClarius/Config_Clarius/arucoTracking.xml), and change the .yml file (~line 26) here to the name of your webcam's calibration .yml file:
+```
+<!-- Original: -->
+CameraCalibrationFile="OpticalMarkerTracker/new_calibration.yml"
+<!-- Edited: -->
+CameraCalibrationFile="OpticalMarkerTracker/webcam_calibration.yml"
+```
+7. Now, drag the files "arucoTracking.xml" and "clariusConfig.xml" from this folder (calibrationClarius/Config_Clarius) to your Plus Toolkit's config folder (PlusApp-Version/config).
+8. Cut out each of the 3 Aruco markers from your "arucoComplete.pdf" printout and set them aside.
 <!-- end of the list -->
 To continue this tutorial, you can find Part 2 in the file path (ClariusTracker/calibrationClarius/Current_Models/README.md).
 ### References
